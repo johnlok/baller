@@ -260,29 +260,6 @@ LevelRoundState.prototype = {
     game.time.events.add(4000, (function() {
         createSmallerEnemies();
         createLargerEnemies();
-
-        this.update = function() {
-                        // This function is called 60 times per second
-            // It contains the game's logic
-
-            ballMovement(playerBall, ax, ay, inputSensitivity, cursors);
-
-            //larger enemies move faster towards you.
-
-            largerEnemies.forEachAlive(moveLargerTowardPlayer, this);
-            smallerEnemies.forEachAlive(moveSmallerTowardPlayer, this);
-
-            //checking for the game win condition
-
-            if (smallerEnemies.countLiving() === 0 && largerEnemies.countLiving() === 0) {
-                if (!winScreenDisplayed) {
-                    winScreenDisplayed = true;
-                    var winScreen = game.add.sprite(centerx, centery, 'youwin');
-                    winScreen.scale.setTo(0.5,0.5);
-                    winScreen.anchor.setTo(0.5,0.5);
-                }
-            }
-        };
     }), this);
 
     //this could be a prefab
