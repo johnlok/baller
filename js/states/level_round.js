@@ -28,12 +28,18 @@ function createPlayer() {
     playerBall = game.add.sprite(centerx, centery, 'player');
 
     if (!gamePlayed) {
+
         playerBall.scale.setTo(1, 1);
+
+        var spawnAnimation = game.add.tween(playerBall.scale).to({x:playerScale, y:playerScale}, 2000, Phaser.Easing.Quadratic.InOut, true);
+
 
         var getReadyScreen = game.add.sprite(centerx, centery + 50, 'getready');
         getReadyScreen.scale.setTo(0.5,0.5);
+
         var getReadyAnimation = game.add.tween(getReadyScreen);
         getReadyAnimation.to({alpha: 0}, 500, Phaser.Easing.Linear.None, true, 0, 7, false);
+
         game.time.events.add(5000, (function() {
             gamePlayed = true;
         }), this);

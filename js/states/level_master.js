@@ -1,6 +1,11 @@
 function LevelMasterState() {}
 
 var playerDifficulty;
+var DIFFICULTIES = {
+  squishy: 1,
+  bouncy: 3,
+  hardcore: 10
+};
 
 LevelMasterState.prototype = {
   create: function() {
@@ -18,6 +23,7 @@ LevelMasterState.prototype = {
 
     var levelSprites = {};
 
+
     levelOptions.forEach(
       function(option){
         var sprite = game.add.sprite(levelTitle.position.x, levelTitle.position.y + option.yOffset, option.name);
@@ -29,25 +35,16 @@ LevelMasterState.prototype = {
         levelSprites[option.name] = sprite;
     });
 
-    function squishyLevel() {
-      playerDifficulty = 1;
+
+    function selectLevel(level) {
+      playerDifficulty = level;
+      gamePlayed = false;
       this.game.state.start('level_round');
     }
 
-    function bouncyLevel() {
-      playerDifficulty = 2;
-      this.game.state.start('level_round');
-    }
-
-    function hardcoreLevel() {
-      playerDifficulty = 8;
-      this.game.state.start('level_round');
-    }
-
-
-    levelSprites.squishy.events.onInputDown.add(squishyLevel,this);
-    levelSprites.bouncy.events.onInputDown.add(bouncyLevel,this);
-    levelSprites.hardcore.events.onInputDown.add(hardcoreLevel,this);
+    levelSprites.squishy.events.onInputDown.add(selectLevel.bind(this, DIFFICULTIES.squishy),this);
+    levelSprites.bouncy.events.onInputDown.add(selectLevel.bind(this, DIFFICULTIES.bouncy),this);
+    levelSprites.hardcore.events.onInputDown.add(selectLevel.bind(this, DIFFICULTIES.hardcore),this);
 
     backButton = game.add.sprite(100, game.height - 100, 'back_button');
     backButton.anchor.setTo(0.5,0.5);
