@@ -26,17 +26,10 @@ window.ondevicemotion = function(e) {
 
 function createPlayer() {
     playerBall = game.add.sprite(centerx, centery, 'player');
-    playerBall.scale.setTo(playerScale, playerScale);
-    game.physics.p2.enable(playerBall);
-
-    // //adding invicibility to the ball for 4 seconds
-
-    playerBall.invincible = true;
-
-    var invincibleAnimation = game.add.tween(playerBall);
-    invincibleAnimation.to({alpha: 0}, 500, Phaser.Easing.Linear.None, true, 0, 7, false).to({alpha: 1}, 500);
 
     if (!gamePlayed) {
+        playerBall.scale.setTo(1, 1);
+
         gamePlayed = true;
         var getReadyScreen = game.add.sprite(centerx, centery + 50, 'getready');
         getReadyScreen.scale.setTo(0.5,0.5);
@@ -44,6 +37,17 @@ function createPlayer() {
         getReadyAnimation.to({alpha: 0}, 500, Phaser.Easing.Linear.None, true, 0, 7, false);
     }
 
+    else {
+        playerBall.scale.setTo(playerScale, playerScale);
+    }
+
+    game.physics.p2.enable(playerBall);
+
+    // //adding invicibility to the ball for 4 seconds
+    playerBall.invincible = true;
+
+    var invincibleAnimation = game.add.tween(playerBall);
+    invincibleAnimation.to({alpha: 0}, 500, Phaser.Easing.Linear.None, true, 0, 7, false).to({alpha: 1}, 500);
 
     game.time.events.add(4000, (function() {
         playerBall.invincible = false;
@@ -59,7 +63,7 @@ function createSmallerEnemies() {
     for (var x = 1; x < 18; x++) {
         var enemySpriteColors = ['blue_ball', 'red_ball', 'green_ball'];
         var enemy = smallerEnemies.create(game.world.randomX, game.world.randomY, game.rnd.pick(enemySpriteColors));
-        var smallerEnemy = game.rnd.realInRange(0.015, playerBall.scale.x);
+        var smallerEnemy = game.rnd.realInRange(0.015, playerScale);
 
         //making enemies smaller than current player size
         enemy.scale.setTo(smallerEnemy, smallerEnemy);
@@ -81,7 +85,7 @@ function createSmallerEnemies() {
 function createLargerEnemies() {
     for (var x = 1; x < 4; x++) {
         var enemy = largerEnemies.create(game.world.randomX, game.world.randomY, 'ball');
-        var largerEnemy = game.rnd.realInRange(playerBall.scale.x, playerBall.scale.x * 1.5);
+        var largerEnemy = game.rnd.realInRange(playerScale, playerScale * 1.5);
         enemy.scale.setTo(largerEnemy, largerEnemy);
         game.physics.p2.enable(enemy, false);
 
@@ -169,7 +173,6 @@ function hitEnemy(playerBall, enemy) {
                 playerBall.sprite.hasCollided = true;
                 game.add.tween(playerBall.sprite.scale).to({ x: 0, y: 0}, 100, Phaser.Easing.Quadratic.InOut, true, 0);
                 var gameOverScreen = game.add.sprite(centerx, centery, 'gameogre');
-                gameOverScreen.scale.setTo(1,1);
                 gameOverScreen.anchor.setTo(0.5,0.5);
                 gameOverScreen.inputEnabled = true;
                 gameOverScreen.events.onInputDown.add(restartGame, this);
