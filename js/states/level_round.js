@@ -23,16 +23,18 @@ window.ondevicemotion = function(e) {
 
 };
 
-
 function createPlayer() {
     playerBall = game.add.sprite(centerx, centery, 'player');
 
     if (!gamePlayed) {
 
-        playerBall.scale.setTo(1, 1);
+        playerBall.scale.setTo(1,1);
 
-        var spawnAnimation = game.add.tween(playerBall.scale).to({x:playerScale, y:playerScale}, 2000, Phaser.Easing.Quadratic.InOut, true);
+        var spawnAnimation = game.add.tween(playerBall.scale).to({x: playerScale, y: playerScale}, 2000, Phaser.Easing.Quadratic.InOut, true);
 
+        //tweening does not affect the sprite body, which messes with collision. the following line is a workaround.
+
+        playerBall.scale.setTo(playerScale, playerScale);
 
         var getReadyScreen = game.add.sprite(centerx, centery + 50, 'getready');
         getReadyScreen.scale.setTo(0.5,0.5);
@@ -51,6 +53,8 @@ function createPlayer() {
 
     game.physics.p2.enable(playerBall);
 
+    playerBall.body.setCollisionGroup(playerCollisionGroup);
+    playerBall.body.collides(enemiesCollisionGroup, hitEnemy, this);
     // //adding invicibility to the ball for 4 seconds
     playerBall.invincible = true;
 
@@ -62,8 +66,7 @@ function createPlayer() {
     }), this);
 
     //setting the collision group for the player
-    playerBall.body.setCollisionGroup(playerCollisionGroup);
-    playerBall.body.collides(enemiesCollisionGroup, hitEnemy, this);
+
 }
 
 
@@ -79,10 +82,15 @@ function createSmallerEnemies() {
 
         //initiating enemy velocity.
 
-        var randv = game.rnd.realInRange(-300, 300);
-        var randv2 = game.rnd.realInRange(-300, 300);
+        var randv = game.rnd.realInRange(-200, 200);
+        var randv2 = game.rnd.realInRange(-200, 200);
+
         enemy.body.velocity.x = randv;
         enemy.body.velocity.y = randv2;
+
+        //fading the enemies in
+        var fadeEnemyIn = game.add.tween(enemy);
+        fadeEnemyIn.from({alpha: 0}, 500, Phaser.Easing.Linear.None, true);
 
         //setting the collision group and having it collide with the player.
         enemy.body.setCollisionGroup(enemiesCollisionGroup);
@@ -99,12 +107,15 @@ function createLargerEnemies() {
 
          //initiating enemy velocity.
 
-        var randv = game.rnd.realInRange(-300, 300);
-        var randv2 = game.rnd.realInRange(-300, 300);
+        var randv = game.rnd.realInRange(-200, 200);
+        var randv2 = game.rnd.realInRange(-200, 200);
 
         enemy.body.velocity.x = randv;
         enemy.body.velocity.y = randv2;
 
+        //fading the enemies in
+        var fadeEnemyIn = game.add.tween(enemy);
+        fadeEnemyIn.from({alpha: 0}, 500, Phaser.Easing.Linear.None, true);
 
         //setting the collision group and having it collide with the player.
         enemy.body.setCollisionGroup(enemiesCollisionGroup);
@@ -130,6 +141,7 @@ function accelerateToObject(obj1, obj2, speed) {
 }
 
 function restartGame() {
+  gamePlayed = false;
   game.state.start('level_round');
 }
 
@@ -225,7 +237,8 @@ LevelRoundState.prototype = {
 
 
   create: function() {
-
+    //setting the world bounds
+    game.world.setBounds(0,0, windowx, windowy);
 
     // starting the P2JS system
     game.physics.startSystem(Phaser.Physics.P2JS);
@@ -233,15 +246,12 @@ LevelRoundState.prototype = {
     // starting collision events
     game.physics.p2.setImpactEvents(true);
     game.physics.p2.restitution = 0.95;
+    game.physics.p2.updateBoundsCollisionGroup();
 
     //creating a collision group for player and enemies
 
     playerCollisionGroup = game.physics.p2.createCollisionGroup();
-
     enemiesCollisionGroup = game.physics.p2.createCollisionGroup();
-
-    game.physics.p2.updateBoundsCollisionGroup();
-
 
     smallerEnemies = game.add.group();
     largerEnemies = game.add.group();
@@ -251,16 +261,13 @@ LevelRoundState.prototype = {
     winScreenDisplayed = false;
     playerScale = 0.1;
 
-    createPlayer();
-
-    createLives();
-
-    //adding a delay to creating enemies.
-
-    game.time.events.add(4000, (function() {
+    game.time.events.add(2000, (function() {
         createSmallerEnemies();
         createLargerEnemies();
     }), this);
+    createPlayer();
+    createLives();
+
 
     //this could be a prefab
     backButton = game.add.sprite(100, game.height - 100, 'back_button');
@@ -283,7 +290,6 @@ LevelRoundState.prototype = {
     // It contains the game's logic
 
     ballMovement(playerBall, ax, ay, inputSensitivity, cursors);
-
     //larger enemies move faster towards you.
 
     largerEnemies.forEachAlive(moveLargerTowardPlayer, this);
