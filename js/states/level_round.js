@@ -30,11 +30,13 @@ function createPlayer() {
     if (!gamePlayed) {
         playerBall.scale.setTo(1, 1);
 
-        gamePlayed = true;
         var getReadyScreen = game.add.sprite(centerx, centery + 50, 'getready');
         getReadyScreen.scale.setTo(0.5,0.5);
         var getReadyAnimation = game.add.tween(getReadyScreen);
         getReadyAnimation.to({alpha: 0}, 500, Phaser.Easing.Linear.None, true, 0, 7, false);
+        game.time.events.add(5000, (function() {
+            gamePlayed = true;
+        }), this);
     }
 
     else {
@@ -247,9 +249,35 @@ LevelRoundState.prototype = {
 
     createLives();
 
-    createSmallerEnemies();
+    //adding a delay to creating enemies.
 
-    createLargerEnemies();
+    game.time.events.add(4000, (function() {
+        createSmallerEnemies();
+        createLargerEnemies();
+
+        this.update = function() {
+                        // This function is called 60 times per second
+            // It contains the game's logic
+
+            ballMovement(playerBall, ax, ay, inputSensitivity, cursors);
+
+            //larger enemies move faster towards you.
+
+            largerEnemies.forEachAlive(moveLargerTowardPlayer, this);
+            smallerEnemies.forEachAlive(moveSmallerTowardPlayer, this);
+
+            //checking for the game win condition
+
+            if (smallerEnemies.countLiving() === 0 && largerEnemies.countLiving() === 0) {
+                if (!winScreenDisplayed) {
+                    winScreenDisplayed = true;
+                    var winScreen = game.add.sprite(centerx, centery, 'youwin');
+                    winScreen.scale.setTo(0.5,0.5);
+                    winScreen.anchor.setTo(0.5,0.5);
+                }
+            }
+        };
+    }), this);
 
     //this could be a prefab
     backButton = game.add.sprite(100, game.height - 100, 'back_button');
@@ -280,7 +308,7 @@ LevelRoundState.prototype = {
 
     //checking for the game win condition
 
-    if (smallerEnemies.countLiving() === 0 && largerEnemies.countLiving() === 0) {
+    if (smallerEnemies.countLiving() === 0 && largerEnemies.countLiving() === 0 && gamePlayed) {
         if (!winScreenDisplayed) {
             winScreenDisplayed = true;
             var winScreen = game.add.sprite(centerx, centery, 'youwin');
