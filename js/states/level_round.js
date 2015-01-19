@@ -5,6 +5,7 @@ var playerLives, playerBall, smallerEnemies, largerEnemies, enemiesCollisionGrou
 var playerScale = 0.1;
 var gamePlayed = false;
 var winScreenDisplayed;
+var userPromptDisplayed = false;
 
 //accelerometer controls
 
@@ -36,11 +37,48 @@ function createPlayer() {
 
         playerBall.scale.setTo(playerScale, playerScale);
 
-        var getReadyScreen = game.add.sprite(centerx, centery + 50, 'getready');
-        getReadyScreen.scale.setTo(0.5,0.5);
 
-        var getReadyAnimation = game.add.tween(getReadyScreen);
-        getReadyAnimation.to({alpha: 0}, 500, Phaser.Easing.Linear.None, true, 0, 7, false);
+        var userControlPrompt, getReadyScreen, getReadyAnimation, controlAnimation;
+
+        if (!userPromptDisplayed) {
+
+            if (game.device.desktop) {
+                getReadyScreen = game.add.sprite(centerx, centery - 50, 'getready');
+                getReadyScreen.scale.setTo(0.5,0.5);
+
+                getReadyAnimation = game.add.tween(getReadyScreen);
+                getReadyAnimation.to({alpha: 0}, 500, Phaser.Easing.Linear.None, true, 0, 4, false);
+
+                userControlPrompt = game.add.sprite(centerx, centery + 50, 'arrows_to_play');
+                userControlPrompt.scale.setTo(0.5, 0.5);
+                userControlPrompt.anchor.setTo(0.5, 0.5);
+
+                controlAnimation = game.add.tween(userControlPrompt);
+                controlAnimation.to({alpha: 0}, 500, Phaser.Easing.Linear.None, true, 0, 4, false);
+
+            }
+
+            else {
+
+                userControlPrompt = game.add.sprite(centerx, centery, 'tilt_to_play');
+                userControlPrompt.scale.setTo(0.5,0.5);
+                userControlPrompt.anchor.setTo(0.5,0.5);
+
+                userControlPrompt.animations.add('tilt_animation');
+                userControlPrompt.animations.play('tilt_animation', 4, true);
+
+                controlAnimation = game.add.tween(userControlPrompt);
+                controlAnimation.to({alpha: 0}, 500, Phaser.Easing.Linear.None, true, 3000);
+            }
+
+        userPromptDisplayed = true;
+
+        game.time.events.add(4000, (function() {
+            userControlPrompt.destroy();
+        }), this);
+
+        }
+
 
         game.time.events.add(5000, (function() {
             gamePlayed = true;

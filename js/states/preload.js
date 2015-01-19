@@ -22,6 +22,8 @@ function start() {
     game.load.image('sense_low', 'assets/sense_low.png');
     game.load.image('sensitivity', 'assets/sensitivity.png');
     game.load.image('back_button', 'assets/back_button.png');
+    game.load.spritesheet('tilt_to_play', 'assets/tilt_spritesheet.png', 580, 656);
+    game.load.image('arrows_to_play', 'assets/arrows_to_play.png');
     game.load.start();
 
 }
